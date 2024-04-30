@@ -5,6 +5,7 @@ import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.BuiltinHelpFormatter;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
+import org.mcupdater.auth.TokenResponse;
 import org.mcupdater.downloadlib.DownloadQueue;
 import org.mcupdater.downloadlib.Downloadable;
 import org.mcupdater.downloadlib.TrackerListener;
@@ -12,6 +13,7 @@ import org.mcupdater.instance.Instance;
 import org.mcupdater.model.*;
 import org.mcupdater.model.Module;
 import org.mcupdater.mojang.MinecraftVersion;
+import org.mcupdater.settings.MSAProfile;
 import org.mcupdater.settings.Profile;
 import org.mcupdater.util.MCUpdater;
 import org.mcupdater.util.ServerPackParser;
@@ -156,6 +158,7 @@ public class MCUCLI extends MCUApp implements TrackerListener {
 
 	@Override
 	public Profile requestLogin(String username) {
+		//TODO - Unimplemented
 		return null;
 	}
 
@@ -176,6 +179,12 @@ public class MCUCLI extends MCUApp implements TrackerListener {
 	@Override
 	public void alert(String msg) {
 		baseLogger.warning(msg);
+	}
+
+	@Override
+	public TokenResponse refreshAuth(MSAProfile msaProfile) {
+		//TODO - Unimplemented
+		return null;
 	}
 
 	@Override
