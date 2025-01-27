@@ -74,6 +74,11 @@ public class MCUCLI extends MCUApp implements TrackerListener {
 			return;
 		}
 		MCUpdater.getInstance(installPath.toFile()).setParent(instance);
+		try {
+			MCUpdater.getInstance().downloadLoaders();
+		} catch (IOException e) {
+			MCUpdater.apiLogger.log(Level.SEVERE,"Error downloading Loader support jars!", e);
+		}
 		instance.doUpdate(pack, server, installPath, side, options.has("clean"));
 	}
 
