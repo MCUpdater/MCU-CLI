@@ -5,6 +5,7 @@ import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.BuiltinHelpFormatter;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
+import org.mcupdater.api.Install;
 import org.mcupdater.auth.TokenResponse;
 import org.mcupdater.downloadlib.DownloadQueue;
 import org.mcupdater.downloadlib.Downloadable;
@@ -20,17 +21,13 @@ import org.mcupdater.util.ServerPackParser;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
+import java.util.logging.*;
 
 public class MCUCLI extends MCUApp implements TrackerListener {
 
@@ -43,7 +40,6 @@ public class MCUCLI extends MCUApp implements TrackerListener {
 
 	public static void main(String args[]) {
 		System.setProperty("java.net.preferIPv4Stack", "true");
-		instance = new MCUCLI();
 		OptionParser optParser = new OptionParser();
 		optParser.accepts("help", "Show help").forHelp();
 		optParser.formatHelpWith(new BuiltinHelpFormatter(160, 3));
@@ -65,6 +61,7 @@ public class MCUCLI extends MCUApp implements TrackerListener {
 			}
 			return;
 		}
+		instance = new MCUCLI(DEBUG);
 		URL pack = packSpec.value(options);
 		String server = serverSpec.value(options);
 		Path installPath = pathSpec.value(options).toPath();
@@ -136,19 +133,27 @@ public class MCUCLI extends MCUApp implements TrackerListener {
 			}
 		}
 		try {
-			MCUpdater.getInstance().installMods(pack, modList, configs, installPath, clean, instData, side);
-		} catch (FileNotFoundException e) {
+			Install install = new Install(pack, modList, configs);
+			install.doInstall(installPath, clean, instData, side);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 	}
 
-	private MCUCLI() {
+	private MCUCLI(boolean DEBUG) {
 		this.baseLogger = Logger.getLogger("MCUpdater");
-		this.baseLogger.setLevel(Level.ALL);
-		ConsoleHandler handler = new ConsoleHandler();
-		handler.setFormatter(new SimpleFormatter());
-		this.baseLogger.addHandler(handler);
+		this.baseLogger.setLevel(DEBUG ? Level.ALL : Level.INFO);
+		try {
+			ConsoleHandler consoleHandler = new ConsoleHandler();
+			consoleHandler.setFormatter(new SimpleFormatter());
+			FileHandler fileHandler = new FileHandler(new File(System.getProperty("user.dir")).toPath().resolve("mcu-cli.log").toString(), 0,3);
+			fileHandler.setFormatter(new FMLStyleFormatter());
+			this.baseLogger.addHandler(consoleHandler);
+			this.baseLogger.addHandler(fileHandler);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
